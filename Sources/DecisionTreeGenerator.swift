@@ -59,9 +59,9 @@ class Queue<Item> {
 ///   the sorting algorithm.
 ///   - This is used to see what elements are being compared and to control what execution path the algorithm will take
 ///     next.
-class SortableItem: Comparable {
+public class SortableItem: Comparable {
     // Abstraction (to the n-th degree) of symbols to use when sorting.
-    enum Symbol: Character, CaseIterable {
+    public enum Symbol: Character, CaseIterable {
         case A = "A"
         case B = "B"
         case C = "C"
@@ -91,7 +91,7 @@ class SortableItem: Comparable {
     }
 
     /// Operators used in comparisons.
-    enum ComparisonOperator: String {
+    public enum ComparisonOperator: String {
         case lessThan = "<"
         case greaterThan = ">"
         case equal = "=="
@@ -119,7 +119,7 @@ class SortableItem: Comparable {
     /// - Parameters:
     ///   - analyzer: Analyzer instance to link with
     ///   - value: Symbolic value of the item
-    init(analyzer: AlgorithmAnalyzer, value: Symbol) {
+    public init(analyzer: AlgorithmAnalyzer, value: Symbol) {
         self.analyzer = analyzer
         self.value = value
     }
@@ -131,45 +131,45 @@ class SortableItem: Comparable {
     ///   - analyzer: Analyzer to link them to
     ///
     /// - Returns: Array of new items
-    static func generateSequentialItems(ofCount count: Int, withAnalyzer analyzer: AlgorithmAnalyzer) -> [SortableItem] {
+    public static func generateSequentialItems(ofCount count: Int, withAnalyzer analyzer: AlgorithmAnalyzer) -> [SortableItem] {
         (0 ..< count).map { i in
             SortableItem.init(analyzer: analyzer, value: Symbol.allCases[i])
         }
     }
 
     /// Intercept less-than comparisons, passing on to the analyzer and returning its decision.
-    static func < (lhs: SortableItem, rhs: SortableItem) -> Bool {
+    public static func < (lhs: SortableItem, rhs: SortableItem) -> Bool {
         lhs.analyzer.compareHandler(comparison: .init(operand1: lhs.value, operand2: rhs.value, compOperator: .lessThan))
     }
 
     /// Intercept greater-than comparisons, passing on to the analyzer and returning its decision.
-    static func > (lhs: SortableItem, rhs: SortableItem) -> Bool {
+    public static func > (lhs: SortableItem, rhs: SortableItem) -> Bool {
         lhs.analyzer.compareHandler(comparison: .init(operand1: lhs.value, operand2: rhs.value, compOperator: .greaterThan))
     }
 
     /// Less-than or equal-to not yet implemented.
-    static func <= (lhs: SortableItem, rhs: SortableItem) -> Bool {
+    public static func <= (lhs: SortableItem, rhs: SortableItem) -> Bool {
         fatalError("This operator is not yet supported.")
     }
 
     /// Greater-than or equal-to not yet implemented.
-    static func >= (lhs: SortableItem, rhs: SortableItem) -> Bool {
+    public static func >= (lhs: SortableItem, rhs: SortableItem) -> Bool {
         fatalError("This operator is not yet supported.")
     }
 
     /// Intercept equal-to comparisons, passing on to the analyzer and returning its decision.
-    static func == (lhs: SortableItem, rhs: SortableItem) -> Bool {
+    public static func == (lhs: SortableItem, rhs: SortableItem) -> Bool {
         lhs.analyzer.compareHandler(comparison: .init(operand1: lhs.value, operand2: rhs.value, compOperator: .equal))
     }
 
     /// Intercept not equal-to comparisons, passing on to the analyzer and returning its decision.
-    static func != (lhs: SortableItem, rhs: SortableItem) -> Bool {
+    public static func != (lhs: SortableItem, rhs: SortableItem) -> Bool {
         lhs.analyzer.compareHandler(comparison: .init(operand1: lhs.value, operand2: rhs.value, compOperator: .notEqual))
     }
 }
 
 /// Represents a comparison between two values.
-struct Comparison: Equatable, Hashable, CustomStringConvertible {
+public struct Comparison: Equatable, Hashable, CustomStringConvertible {
     /// First operand
     let operand1: SortableItem.Symbol
 
@@ -180,7 +180,7 @@ struct Comparison: Equatable, Hashable, CustomStringConvertible {
     let compOperator: SortableItem.ComparisonOperator
 
     /// String representation of comparison
-    var description: String {
+    public var description: String {
         "\(operand1.rawValue) \(compOperator.rawValue) \(operand2.rawValue)"
     }
 
@@ -203,7 +203,7 @@ struct Comparison: Equatable, Hashable, CustomStringConvertible {
     }
 
     /// Check if two comparisons are equivalent.
-    static func == (lhs: Comparison, rhs: Comparison) -> Bool {
+    public static func == (lhs: Comparison, rhs: Comparison) -> Bool {
         let lhsNormalized = lhs.normalize()
         let rhsNormalized = rhs.normalize()
         return (
@@ -214,7 +214,7 @@ struct Comparison: Equatable, Hashable, CustomStringConvertible {
     }
 
     /// Hash the operator.
-    func hash(into hasher: inout Hasher) {
+    public func hash(into hasher: inout Hasher) {
         let normalized = normalize()
         hasher.combine(normalized.compOperator)
         hasher.combine(normalized.operand1)
@@ -223,21 +223,48 @@ struct Comparison: Equatable, Hashable, CustomStringConvertible {
 }
 
 /// A generic node in the decision tree.
-class DecisionTreeNode {
+public class DecisionTreeNode {
+    func getPathComparisonCounts(previousCounts: Int, totalCounts: inout [Int]) {
+        fatalError("Not implemented")
+    }
+
+    /// Get the average execution path length
+    func averagePathLength() -> Double {
+        var counts = [Int]()
+        getPathComparisonCounts(previousCounts: 0, totalCounts: &counts)
+        return Double(counts.reduce(0, +)) / Double(counts.count)
+    }
+
+    func prunedNodeCount() -> Int {
+        fatalError("Not implemented")
+    }
 }
 
 /// Node holding a comparison in the tree.
-class DecisionTreeComparisonNode: DecisionTreeNode, CustomStringConvertible {
-    /// Frame with information about the comparison at this node.
-    var comparisonFrame: ComparisonFrame?
+public class DecisionTreeComparisonNode: DecisionTreeNode, CustomStringConvertible {
+    /// Comparison made at this node.
+    let comparisonMade: Comparison
 
     /// Left and right subtrees
     var leftNode: DecisionTreeNode?
     var rightNode: DecisionTreeNode?
 
+    init(comparisonMade: Comparison) {
+        self.comparisonMade = comparisonMade
+    }
+
     /// Use the comparison as the text of the node.
-    var description: String {
-        comparisonFrame!.comparisonMade.description
+    public var description: String {
+        comparisonMade.description
+    }
+
+    override func getPathComparisonCounts(previousCounts: Int, totalCounts: inout [Int]) {
+        leftNode?.getPathComparisonCounts(previousCounts: previousCounts + 1, totalCounts: &totalCounts)
+        rightNode?.getPathComparisonCounts(previousCounts: previousCounts + 1, totalCounts: &totalCounts)
+    }
+
+    override func prunedNodeCount() -> Int {
+        (leftNode?.prunedNodeCount() ?? 1) + (rightNode?.prunedNodeCount() ?? 1)
     }
 }
 
@@ -257,6 +284,14 @@ class DecisionTreeResultNode: DecisionTreeNode, CustomStringConvertible {
         }
         return "[\(values.joined(separator: ", "))]"
     }
+
+    override func getPathComparisonCounts(previousCounts: Int, totalCounts: inout [Int]) {
+        totalCounts.append(previousCounts)
+    }
+
+    override func prunedNodeCount() -> Int {
+        0
+    }
 }
 
 /// Hold information about a comparison and outcome made during execution.
@@ -272,17 +307,16 @@ class ComparisonFrame {
     /// Tree node back-referencing this comparison.
     var treeNode: DecisionTreeComparisonNode
 
-    init(comparison: Comparison, outcome: Bool, treeNode: DecisionTreeComparisonNode) {
+    public init(comparison: Comparison, outcome: Bool, treeNode: DecisionTreeComparisonNode) {
         comparisonMade = comparison
         self.outcome = outcome
         // Add the tree node ref and backref
         self.treeNode = treeNode
-        self.treeNode.comparisonFrame = self
     }
 
     /// Init without a tree node (create a new one).
-    convenience init(comparison: Comparison, outcome: Bool) {
-        self.init(comparison: comparison, outcome: outcome, treeNode: .init())
+    public convenience init(comparison: Comparison, outcome: Bool) {
+        self.init(comparison: comparison, outcome: outcome, treeNode: .init(comparisonMade: comparison))
     }
 
     /// Truth comparison formed by the comparison and its outcome.
@@ -297,20 +331,13 @@ class ComparisonFrame {
     func truth() -> Comparison {
         outcome ? comparisonMade : comparisonMade.negate()
     }
-
-    /// Break the circular relationship with the associated tree node.
-    ///
-    /// This should be done to drop a no longer needed comparison frame and tree node.
-    func deinitNodeRelationship() {
-        treeNode.comparisonFrame = nil
-    }
 }
 
 /// A stack for tracking the execution path of the program through the decision tree.
 class PathTrackerStack: Stack<ComparisonFrame> {
     /// Set of truths: comparisons which denote decisions made in the stack (which new stack frames must be consistent
-    /// with)
-    var truthSet = Set<Comparison>()
+    /// with) and the number of occurrences of each
+    var truthSet = [Comparison: Int]()
 
     /// Generate a queue of comparison results which must be returned to restore the execution state of the sorting
     /// algorithm.
@@ -324,13 +351,13 @@ class PathTrackerStack: Stack<ComparisonFrame> {
         return queue
     }
 
-    /// Add the frame's truth to the truth set and link the previous tree node after pushing.
+    /// Increment the frame's truth set key and link the previous tree node after pushing.
     ///
     /// - Parameter item: Frame to push
     override func push(item: ComparisonFrame) {
         let topFrame = peek()
         super.push(item: item)
-        truthSet.insert(item.truth())
+        truthSet[item.truth(), default: 0] += 1
         // If there was a top frame on the stack, link its tree node to the new frame's; else, exit (this is the root)
         guard let previousFrame = topFrame else {
             return
@@ -344,13 +371,13 @@ class PathTrackerStack: Stack<ComparisonFrame> {
         }
     }
 
-    /// Remove the frame's truth from the truth set after popping, if value is popped.
+    /// Decrement the frame's truth set key after popping, if value is popped.
     ///
     /// - Returns: Frame popped, if at least one on stack
     override func pop() -> ComparisonFrame? {
         let item = super.pop()
         if item != nil {
-            truthSet.remove(item!.truth())
+            truthSet[item!.truth()] = max(truthSet[item!.truth(), default: 0] - 1, 0)
         }
         return item
     }
@@ -363,11 +390,21 @@ class PathTrackerStack: Stack<ComparisonFrame> {
         // Get the opposite of the frame's truth
         let oppositeTruth = frame.truth().negate()
         // Check if the opposite truth already exists, making the original invalid
-        return !truthSet.contains(oppositeTruth)
+        return truthSet[oppositeTruth, default: 0] == 0
     }
 }
 
-class AlgorithmAnalyzer {
+/// Metadata about an algorithm
+public struct AlgorithmMeta {
+    /// Name of the algorithm
+    let name: String
+    
+    public init(name: String) {
+        self.name = name
+    }
+}
+
+open class AlgorithmAnalyzer {
     /// Different modes of operation that the program can be in.
     enum OperationMode {
         case exploratory
@@ -394,10 +431,9 @@ class AlgorithmAnalyzer {
     /// State restoration queue
     private var stateRestorationQueue = Queue<Bool>()
 
-    init(arraySize: Int) {
+    public required init(arraySize: Int) {
         self.arraySize = arraySize
     }
-
 
     /// Get an array of items to sort.
     ///
@@ -471,7 +507,6 @@ class AlgorithmAnalyzer {
                 let newFrame = ComparisonFrame(comparison: topFrame.comparisonMade, outcome: false, treeNode: topFrame.treeNode)
                 // If not valid, restart and check another frame
                 if !pathTrackerStack.checkIfFrameValid(frame: newFrame) {
-                    newFrame.deinitNodeRelationship()
                     continue
                 }
                 // It's valid, so push it
@@ -506,8 +541,6 @@ class AlgorithmAnalyzer {
             pathTrackerStack.push(item: newFrame)
             return true
         }
-        // Else, deinit the frame
-        newFrame.deinitNodeRelationship()
         return false
     }
 
@@ -549,34 +582,13 @@ class AlgorithmAnalyzer {
     /// Must be overridden and implemented in a subclass.
     ///
     /// - Parameter items: List of items to be sorted
-    func algorithm(items: inout [SortableItem]) {
+    open func algorithm(items: inout [SortableItem]) {
         fatalError("You must override this method with your own algorithm.")
     }
 }
 
-class BubbleSortAlgorithm: AlgorithmAnalyzer {
-    override func algorithm(items: inout [SortableItem]) {
-        for i in 1 ..< items.count {
-            for j in 0 ..< items.count - i {
-                if items[j] > items[j + 1] {
-                    let temp = items[j]
-                    items[j] = items[j + 1]
-                    items[j + 1] = temp
-                }
-            }
-        }
-    }
-}
-
-class InsertionSortAlgorithm: AlgorithmAnalyzer {
-    override func algorithm(items: inout [SortableItem]) {
-        var a = items
-        for x in 1..<a.count {
-            var y = x
-            while y > 0 && a[y] < a[y - 1] {
-                a.swapAt(y - 1, y)
-                y -= 1
-            }
-        }
-    }
+/// An algorithm which should be displayed in the UI.
+public protocol UIAlgorithm: AlgorithmAnalyzer {
+    /// UI Metadata about the algorithm
+    static var meta: AlgorithmMeta { get }
 }
