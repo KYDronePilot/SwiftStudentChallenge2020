@@ -3,21 +3,6 @@ import SwiftUI
 import PlaygroundSupport
 import Foundation
 
-var str = "Hello, playground"
-
-
-
-
-//struct ContentView: View {
-//    var body: some View {
-//        FullView()
-//            .background(Color.white)
-//    }
-//}
-
-
-
-
 
 /// Now it's your turn to try adding a new algorithm!
 ///
